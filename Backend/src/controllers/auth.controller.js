@@ -88,7 +88,7 @@ auth.register = async (req, res) => {
  */
 auth.login = async (req, res) => {
   try {
-    console.log("🔥 LOGIN BODY RECEIVED:", req.body);
+    console.log(" LOGIN BODY RECEIVED:", req.body);
 
     const { error, value } = loginSchema.validate(req.body);
     if (error) return res.status(400).json({ error: error.message });

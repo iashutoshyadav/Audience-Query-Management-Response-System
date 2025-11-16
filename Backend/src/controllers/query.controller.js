@@ -29,8 +29,6 @@ queryCtrl.create = async (req, res) => {
   try {
     const { error, value } = createSchema.validate(req.body);
     if (error) return res.status(400).json({ error: error.message });
-
-    // FIX: req.user.id (NOT _id)
     const query = await Query.create({
       ...value,
       user: req.user.id,

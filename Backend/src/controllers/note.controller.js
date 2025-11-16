@@ -14,7 +14,6 @@ const noteCtrl = {};
 
 /**
  * POST /api/notes
- * Create a new note attached to a query (optional)
  */
 noteCtrl.create = async (req, res) => {
   try {
@@ -22,13 +21,10 @@ noteCtrl.create = async (req, res) => {
     if (error) return res.status(400).json({ error: error.message });
 
     const { content, queryId } = value;
-
-    // If a query ID is provided, ensure the query exists
     if (queryId) {
       const q = await Query.findById(queryId);
       if (!q) return res.status(404).json({ error: "Query not found" });
     }
-
     const note = new Note({
       content,
       user: req.user.id,
@@ -43,10 +39,6 @@ noteCtrl.create = async (req, res) => {
   }
 };
 
-/**
- * GET /api/notes?queryId=&page=&limit=
- * Users see their own notes; agents/admins see all
- */
 noteCtrl.list = async (req, res) => {
   try {
     const { page = 1, limit = 20, queryId } = req.query;
@@ -54,8 +46,6 @@ noteCtrl.list = async (req, res) => {
     const filter = {};
 
     if (queryId) filter.query = queryId;
-
-    // Users can only see their own notes
     if (req.user.role === "user") {
       filter.user = req.user.id;
     }

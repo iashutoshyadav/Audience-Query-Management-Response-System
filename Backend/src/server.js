@@ -12,12 +12,8 @@ let server;
 
 (async () => {
   try {
-    // 1️⃣ Connect to MongoDB BEFORE starting server
     await connect(process.env.MONGO_URI);
-
-    // 2️⃣ Start server only if DB connection succeeds
     server = http.createServer(app);
-
     server.listen(PORT, () => {
       logger.info(
         `Server listening on port ${PORT} (env=${process.env.NODE_ENV || "development"})`

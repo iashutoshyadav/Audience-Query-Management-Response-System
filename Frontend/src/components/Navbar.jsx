@@ -6,20 +6,14 @@ import { Menu } from "lucide-react";
 export default function Navbar({ onMenuClick, onLoginClick }) {
   const { user } = useAuth();
   const location = useLocation();
-
-  // Hide navbar on login page (optional)
   if (location.pathname === "/login") return null;
 
   return (
    <nav className="bg-white shadow-sm sticky top-0 z-50">
   <div className="w-full mx-auto py-3 flex items-center justify-between pr-0">
-
-    {/* LEFT: Logo */}
     <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-2 pl-4">
       <span className="font-semibold text-lg text-primary">QueryPilot</span>
     </Link>
-
-    {/* RIGHT: HAMBURGER MENU */}
     {user ? (
       <button
         onClick={onMenuClick}

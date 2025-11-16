@@ -17,7 +17,6 @@ export default function PriorityBadge({ value = "medium" }) {
     styles[safeValue]
   );
 
-  // Capitalize for better UI
   const label = safeValue.charAt(0).toUpperCase() + safeValue.slice(1);
 
   return (

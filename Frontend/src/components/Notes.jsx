@@ -7,9 +7,6 @@ export default function Notes({ queryId }) {
   const [text, setText] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // ----------------------------------------------------
-  // Fetch Notes
-  // ----------------------------------------------------
   const fetchNotes = useCallback(async () => {
     try {
       setLoading(true);
@@ -31,17 +28,12 @@ export default function Notes({ queryId }) {
     fetchNotes();
   }, [fetchNotes]);
 
-  // ----------------------------------------------------
-  // Add Note
-  // ----------------------------------------------------
   const handleAdd = async (e) => {
     e.preventDefault();
     const content = text.trim();
     if (!content) return;
 
     setSaving(true);
-
-    // optimistic temporary note
     const tempNote = {
       _id: "temp-" + Math.random(),
       content,
@@ -54,8 +46,6 @@ export default function Notes({ queryId }) {
     try {
       const res = await api.post("/notes", { content, queryId });
       const realNote = res.data?.data;
-
-      // Replace temp note with real note
       setNotes((prev) => prev.map((n) => (n._id === tempNote._id ? realNote : n)));
 
       setText("");
@@ -71,8 +61,6 @@ export default function Notes({ queryId }) {
   return (
     <section className="bg-white rounded-md shadow p-4">
       <h4 className="font-semibold mb-3">Notes</h4>
-
-      {/* Add Note Form */}
       <form onSubmit={handleAdd} className="mb-4">
         <textarea
           value={text}

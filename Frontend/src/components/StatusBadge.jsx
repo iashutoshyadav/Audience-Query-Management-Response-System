@@ -10,7 +10,6 @@ const styles = {
 };
 
 export default function StatusBadge({ status = "open" }) {
-  // Ensure valid status
   const safeStatus = styles[status] ? status : "open";
 
   const cls = clsx(
@@ -18,7 +17,6 @@ export default function StatusBadge({ status = "open" }) {
     styles[safeStatus]
   );
 
-  // Format: open → Open, in_progress → In Progress
   const label = safeStatus
     .split("_")
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))

@@ -1,4 +1,3 @@
-// src/pages/Dashboard.jsx
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import api from "../utils/api";
 
@@ -18,22 +17,7 @@ import {
   Cell,
 } from "recharts";
 
-/**
- * Dashboard.jsx
- *
- * - Pulls queries from /api/queries (same calls you were using)
- * - Builds:
- *    - lineData: avg response time (minutes) grouped by weekday (Mon..Sun)
- *    - pieData: queries by channel
- *    - categoryData: queries by category
- *    - statusData: counts by status
- * - Stat cards: total, resolved, avg response time, urgent
- *
- * Notes:
- * - The code tries multiple field names for response time:
- *    q.responseTimeMinutes | q.response_time_minutes | compute from closedAt-createdAt
- * - If no response time info exists, the line chart falls back to query counts per weekday.
- */
+
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const PIE_COLORS = ["#8B5CF6", "#7C3AED", "#A78BFA", "#C4B5FD", "#7DD3FC", "#60A5FA"];
@@ -56,8 +40,6 @@ export default function Dashboard() {
   const fetchOverview = useCallback(async () => {
     try {
       setLoading(true);
-
-      // fetch recent (limit 5) + all (limit large)
       const [recentRes, statsRes] = await Promise.all([
         api.get("/api/queries", { params: { limit: 3, page: 1 } }),
         api.get("/api/queries", { params: { limit: 1500, page: 1 } }),
@@ -69,12 +51,10 @@ export default function Dashboard() {
       setRecent(recentList);
       setAllQueries(all);
 
-      // Stats
       const total = statsRes?.data?.total ?? all.length;
       const resolvedCount = all.filter((q) => (q.status || "").toLowerCase() === "resolved").length;
       const urgentCount = all.filter((q) => (q.priority || "").toLowerCase() === "urgent").length;
 
-      // Compute average response time across all queries (minutes) if possible
       let sumResp = 0;
       let respCount = 0;
 
@@ -92,7 +72,6 @@ export default function Dashboard() {
           return;
         }
 
-        // fallback: compute from createdAt -> closedAt or createdAt -> firstRespondedAt
         const created = q.createdAt || q.created_at || q.created;
         const closed = q.closedAt || q.closed_at || q.closed;
         const firstResp = q.firstRespondedAt || q.first_responded_at || q.firstResponseAt;
@@ -130,7 +109,6 @@ export default function Dashboard() {
       });
     } catch (err) {
       console.error("Dashboard load failed:", err);
-      // keep UI usable — show toast or alert
       try {
         alert(err?.message || "Failed to load dashboard");
       } catch (e) {}
@@ -151,15 +129,10 @@ export default function Dashboard() {
     categoryData,
     statusData,
   } = useMemo(() => {
-    // Prepare accumulators
     const channelCounts = {}; // for pie
     const catCounts = {}; // for category bar
     const statusCounts = {}; // for status bar
-
-    // For line chart (weekday aggregation)
     const weekdayAgg = {
-      // weekday index 0 = Mon ... 6 = Sun
-      // store { sumResponse, count } for averaging response time, and count fallback
       0: { sumResponse: 0, countResp: 0, countTotal: 0 },
       1: { sumResponse: 0, countResp: 0, countTotal: 0 },
       2: { sumResponse: 0, countResp: 0, countTotal: 0 },
@@ -168,8 +141,6 @@ export default function Dashboard() {
       5: { sumResponse: 0, countResp: 0, countTotal: 0 },
       6: { sumResponse: 0, countResp: 0, countTotal: 0 },
     };
-
-    // helper: compute response minutes per query (returns number or null)
     function getResponseMinutes(q) {
       const byField =
         q.responseTimeMinutes ??
@@ -236,7 +207,6 @@ export default function Dashboard() {
       }
     });
 
-    // Build lineData: for each weekday, if we have response-time samples -> avg. else fallback to countTotal
     const line = WEEKDAYS.map((label, i) => {
       const bucket = weekdayAgg[i];
       if (bucket.countResp > 0) {
@@ -245,8 +215,6 @@ export default function Dashboard() {
           value: Math.round(bucket.sumResponse / bucket.countResp), // avg minutes rounded
         };
       }
-      // fallback: use total count that day (scaled to look like minutes) OR just return count
-      // We'll return count (chart tooltip will show it's a count fallback)
       return {
         day: label,
         value: bucket.countTotal,

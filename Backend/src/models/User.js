@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
-      unique: true,  // this automatically creates an index
+      unique: true,
       lowercase: true,
       trim: true,
       maxlength: 200,
@@ -44,9 +44,7 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Keep only non-email indexes
 userSchema.index({ role: 1 });
-// userSchema.index({ is_active: 1 }); // optional
 
 const User = mongoose.model('User', userSchema);
 

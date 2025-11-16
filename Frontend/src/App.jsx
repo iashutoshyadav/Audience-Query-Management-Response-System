@@ -42,11 +42,7 @@ const DashboardLayout = ({ children, onLoginClick }) => {
         onLoginClick={onLoginClick}
         onMenuClick={() => setOpenMenu(true)}
       />
-
-      {/* Right-side dynamic sidebar */}
       <Sidebar open={openMenu} onClose={() => setOpenMenu(false)} />
-
-      {/* Main content (full width, no left sidebar) */}
       <main className="flex-1 p-6 overflow-y-auto">
         {children}
       </main>
@@ -67,8 +63,6 @@ export default function App() {
     <>
       {/* ROUTES */}
       <Routes>
-
-        {/* PUBLIC HOME PAGE */}
         <Route
           path="/"
           element={
@@ -86,8 +80,6 @@ export default function App() {
             )
           }
         />
-
-        {/* LOGIN PAGE (if someone opens /login manually) */}
         <Route
           path="/login"
           element={

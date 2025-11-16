@@ -1,4 +1,3 @@
-// Simple keyword-based tagger; replace with ML when needed
 export default function classifyText(text = "") {
   const input = text.toLowerCase();
   const tags = new Set();
@@ -15,7 +14,7 @@ export default function classifyText(text = "") {
     for (const keyword of keywords) {
       if (input.includes(keyword)) {
         tags.add(tag);
-        break; // optimization: stop checking once matched
+        break;
       }
     }
   }

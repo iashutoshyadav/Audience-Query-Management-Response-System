@@ -1,8 +1,7 @@
-// src/utils/emailReader.js
 import Imap from "imap";
 import { simpleParser } from "mailparser";
 import Query from "../models/Query.js";
-import { classifyEmail } from "./autoClassifier.js";  // ⭐ ADD THIS
+import { classifyEmail } from "./autoClassifier.js";
 
 export function startEmailReader() {
   const imap = new Imap({
@@ -35,21 +34,15 @@ export function startEmailReader() {
         const parsed = await simpleParser(buffer);
 
         if (!parsed || !parsed.messageId) return;
-
-        // ✅ Prevent duplicate entries
         const exists = await Query.findOne({ messageId: parsed.messageId });
         if (exists) {
           console.log("⏭ Duplicate email skipped:", parsed.subject);
           return;
         }
-
-        // Extract data safely
         const sender = parsed.from?.text || "Unknown Sender";
         const title = parsed.subject || "No Subject";
         const body = parsed.text || parsed.html || "No Content";
         const receivedAt = parsed.date || new Date();
-
-        // ⭐ Save initial email immediately
         const q = await Query.create({
           source: "email",
           sender,
@@ -65,8 +58,6 @@ export function startEmailReader() {
         });
 
         console.log("📩 Saved email:", title);
-
-        // ⭐ AI classification in background
         (async () => {
           try {
             const ai = await classifyEmail(title, body);
@@ -81,14 +72,14 @@ export function startEmailReader() {
               },
             });
 
-            console.log("🤖 AI classified:", ai);
+            console.log(" AI classified:", ai);
           } catch (error) {
-            console.error("❌ AI classify error:", error.message);
+            console.error(" AI classify error:", error.message);
           }
         })();
 
       } catch (err) {
-        console.error("❌ Parsing error:", err.message);
+        console.error(" Parsing error:", err.message);
       }
     });
   }
@@ -138,7 +129,7 @@ export function startEmailReader() {
 
   /* ---------------------- Error Handling ---------------------- */
   imap.once("error", (err) => {
-    console.error("❌ IMAP Error:", err.message);
+    console.error(" IMAP Error:", err.message);
   });
 
   imap.once("end", () => {

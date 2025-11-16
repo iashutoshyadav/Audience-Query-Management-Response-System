@@ -31,10 +31,7 @@ const noteSchema = new mongoose.Schema(
     collection: 'notes',
   }
 );
-
-// Index
 noteSchema.index({ query: 1 });
-
 const Note = mongoose.model('Note', noteSchema);
 
 export default Note;

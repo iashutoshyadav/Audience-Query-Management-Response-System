@@ -34,7 +34,7 @@ export default function Login({ onClose }) {
     try {
       await login(form);
 
-      // ⭐ CLOSE LOGIN MODAL AFTER SUCCESS
+      // CLOSE LOGIN MODAL AFTER SUCCESS
       if (onClose) onClose();
 
       navigate("/inbox");

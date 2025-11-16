@@ -12,7 +12,7 @@ const variants = {
 };
 
 export default function TagChip({ children, variant = "default" }) {
-  if (!children) return null; // no empty chips
+  if (!children) return null;
   
   const cls = clsx(
     "text-xs inline-block px-2 py-1 rounded select-none",

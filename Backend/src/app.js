@@ -17,8 +17,6 @@ import whatsappRoutes from "./routes/whatsapp.routes.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 const app = express();
-
-// For deployments behind reverse proxies (Heroku, Vercel, render.com etc.)
 app.set("trust proxy", 1);
 
 /* ----------------------------- Middlewares ----------------------------- */
@@ -48,7 +46,6 @@ app.use(
   })
 );
 
-// Rate limiting (15 minutes window)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 300,
@@ -65,7 +62,6 @@ app.use("/api/queries", queryRoutes);
 app.use("/api/notes", noteRoutes);
 app.use("/api/ai", aiRoutes);
 
-// Health check endpoint
 app.get("/_health", (req, res) =>
   res.json({
     status: "ok",
@@ -73,12 +69,10 @@ app.get("/_health", (req, res) =>
   })
 );
 
-// 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: "Not found" });
 });
 
-// Global error handler
 app.use(errorHandler);
 
 export default app;

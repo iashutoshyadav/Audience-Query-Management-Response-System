@@ -2,10 +2,6 @@ import generateReply from "../utils/replyGen.js";
 
 const aiCtrl = {};
 
-/**
- * POST /api/ai/generate
- * Generate an AI-powered reply using OpenAI (if configured)
- */
 aiCtrl.generate = async (req, res) => {
   try {
     const { title, body, tags = [] } = req.body;

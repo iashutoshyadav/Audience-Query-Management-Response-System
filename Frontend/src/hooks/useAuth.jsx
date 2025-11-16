@@ -15,9 +15,6 @@ function useProvideAuth() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ------------------------------------
-  // Initialize FROM TOKEN ONLY (no /me)
-  // ------------------------------------
   useEffect(() => {
     const token = localStorage.getItem(TOKEN_KEY);
 
@@ -27,14 +24,10 @@ function useProvideAuth() {
       return;
     }
 
-    // Consider logged-in BUT no user data → just token
     setUser({ token });
     setLoading(false);
   }, []);
 
-  // ------------------------------------
-  // LOGIN
-  // ------------------------------------
   const login = async (data) => {
     const res = await api.post('/api/auth/login', data);
 
@@ -53,16 +46,12 @@ function useProvideAuth() {
 
     if (!token) throw new Error("No token returned from server");
 
-    // Save token & user
     localStorage.setItem(TOKEN_KEY, token);
     setUser(userData);
 
     return res.data;
   };
 
-  // ------------------------------------
-  // REGISTER
-  // ------------------------------------
   const register = async (data) => {
     const res = await api.post('/api/auth/register', data);
     return res.data;
@@ -74,7 +63,7 @@ function useProvideAuth() {
   const logout = () => {
     localStorage.removeItem(TOKEN_KEY);
     setUser(null);
-    window.location.href = "/";  // 👈 FORCE redirect to HOME page
+    window.location.href = "/";
   };
 
   return {

@@ -35,7 +35,6 @@ export default function NewQuery() {
         body: form.body.trim(),
       });
 
-      // Redirect to inbox (so new query appears)
       navigate("/inbox");
 
     } catch (err) {
