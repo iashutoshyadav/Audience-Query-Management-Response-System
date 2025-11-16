@@ -28,7 +28,7 @@ app.use(
     origin: [
      
       "https://audience-query-management-response-theta.vercel.app",
-       "http://localhost:5173",
+      //  "http://localhost:5173",
     ],
     credentials: true,
   })
