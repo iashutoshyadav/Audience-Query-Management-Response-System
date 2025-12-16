@@ -1,23 +1,23 @@
-import axios from 'axios';
-import { API_BASE, TOKEN_KEY } from './constants';
+import axios from "axios";
+import { API_BASE, TOKEN_KEY } from "./constants";
 
 const api = axios.create({
-  baseURL:API_BASE,
+  baseURL: API_BASE,
   timeout: 15000,
+  withCredentials: true,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 api.interceptors.request.use(
   (config) => {
     try {
-      const token = localStorage.getItem(TOKEN_KEY);
+      const token = sessionStorage.getItem(TOKEN_KEY);
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
-    } catch {
-    }
+    } catch {}
     return config;
   },
   (error) => Promise.reject(error)
@@ -29,7 +29,7 @@ api.interceptors.response.use(
     if (!error.response) {
       return Promise.reject({
         status: null,
-        message: 'Network error. Please check your connection.',
+        message: "Network error. Please check your connection.",
         data: null,
         raw: error,
       });
@@ -38,23 +38,17 @@ api.interceptors.response.use(
     const { status, data } = error.response;
 
     if (status === 401) {
-      console.warn('⚠️ Unauthorized: Token expired or invalid');
+      console.warn("⚠️ Unauthorized: Token expired or invalid");
+      sessionStorage.removeItem(TOKEN_KEY);
     }
 
     return Promise.reject({
       status,
-      message: data?.message || 'Something went wrong.',
+      message: data?.message || "Something went wrong.",
       data,
       raw: error,
     });
   }
 );
-export const createApiController = () => {
-  const controller = new AbortController();
-  return {
-    signal: controller.signal,
-    cancel: () => controller.abort(),
-  };
-};
 
 export default api;

@@ -1,6 +1,6 @@
-import { useEffect, useState, createContext, useContext } from 'react';
-import api from '../utils/api';
-import { TOKEN_KEY } from '../utils/constants';
+import { useEffect, useState, createContext, useContext } from "react";
+import api from "../utils/api";
+import { TOKEN_KEY } from "../utils/constants";
 
 const AuthContext = createContext(null);
 
@@ -15,8 +15,19 @@ function useProvideAuth() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // ✅ AUTO LOGOUT ON TAB CLOSE / REFRESH
   useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
+    const handleUnload = () => {
+      sessionStorage.removeItem(TOKEN_KEY);
+    };
+
+    window.addEventListener("beforeunload", handleUnload);
+    return () => window.removeEventListener("beforeunload", handleUnload);
+  }, []);
+
+  // ✅ CHECK SESSION ON LOAD
+  useEffect(() => {
+    const token = sessionStorage.getItem(TOKEN_KEY);
 
     if (!token) {
       setUser(null);
@@ -29,13 +40,12 @@ function useProvideAuth() {
   }, []);
 
   const login = async (data) => {
-    const res = await api.post('/api/auth/login', data);
-
-    console.log("LOGIN RESPONSE:", res.data);
+    const res = await api.post("/api/auth/login", data);
 
     const loginData = res?.data?.data;
-
     const token = loginData?.token;
+
+    if (!token) throw new Error("No token returned from server");
 
     const userData = {
       id: loginData?.id,
@@ -44,24 +54,20 @@ function useProvideAuth() {
       role: loginData?.role,
     };
 
-    if (!token) throw new Error("No token returned from server");
-
-    localStorage.setItem(TOKEN_KEY, token);
+    // ✅ STORE IN SESSION STORAGE
+    sessionStorage.setItem(TOKEN_KEY, token);
     setUser(userData);
 
     return res.data;
   };
 
   const register = async (data) => {
-    const res = await api.post('/api/auth/register', data);
+    const res = await api.post("/api/auth/register", data);
     return res.data;
   };
 
-  // ------------------------------------
-  // LOGOUT (redirect to HOME PAGE)
-  // ------------------------------------
   const logout = () => {
-    localStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
     setUser(null);
     window.location.href = "/";
   };

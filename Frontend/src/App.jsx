@@ -1,85 +1,101 @@
-import React, { useState } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import Dashboard from './pages/Dashboard';
-import Inbox from './pages/Inbox';
-import QueryDetail from './pages/QueryDetail';
-import NewQuery from './pages/NewQuery';
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Dashboard from "./pages/Dashboard";
+import Inbox from "./pages/Inbox";
+import QueryDetail from "./pages/QueryDetail";
+import NewQuery from "./pages/NewQuery";
 import Home from "./pages/Home.jsx";
 
-import { useAuth } from './hooks/useAuth';
-import Navbar from './components/Navbar';
-import Sidebar from './components/Sidebar';
-import ModalWrapper from './components/ModalWrapper';
+import { useAuth } from "./hooks/useAuth";
+import Navbar from "./components/Navbar";
+import Sidebar from "./components/Sidebar";
+import ModalWrapper from "./components/ModalWrapper";
+import { TOKEN_KEY } from "./utils/constants";
 
-// Protected Route
+/* -------------------------------------------------------------------------- */
+/*                               PROTECTED ROUTE                              */
+/* -------------------------------------------------------------------------- */
+
 function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth();
+  const { loading } = useAuth();
+  const token = sessionStorage.getItem(TOKEN_KEY);
+
   if (loading) return <div className="p-8 text-center">Loading...</div>;
-  if (!user) return <Navigate to="/login" replace />;
+
+  if (!token) {
+    return <Navigate to="/" replace />;
+  }
+
   return children;
 }
 
-// Public Only Route
+/* -------------------------------------------------------------------------- */
+/*                               PUBLIC ONLY ROUTE                            */
+/* -------------------------------------------------------------------------- */
+
 function PublicOnlyRoute({ children }) {
-  const { user, loading } = useAuth();
+  const { loading } = useAuth();
+  const token = sessionStorage.getItem(TOKEN_KEY);
+
   if (loading) return <div className="p-8 text-center">Loading...</div>;
-  if (user) return <Navigate to="/dashboard" replace />;
+
+  if (token) {
+    return <Navigate to="/inbox" replace />;
+  }
+
   return children;
 }
 
-// Layout
+/* -------------------------------------------------------------------------- */
+/*                                   LAYOUT                                   */
+/* -------------------------------------------------------------------------- */
+
 const DashboardLayout = ({ children, onLoginClick }) => {
   const [openMenu, setOpenMenu] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-
-      {/* Navbar */}
       <Navbar
         onLoginClick={onLoginClick}
         onMenuClick={() => setOpenMenu(true)}
       />
       <Sidebar open={openMenu} onClose={() => setOpenMenu(false)} />
-      <main className="flex-1 p-6 overflow-y-auto">
-        {children}
-      </main>
+      <main className="flex-1 p-6 overflow-y-auto">{children}</main>
     </div>
   );
 };
 
-
-
+/* -------------------------------------------------------------------------- */
+/*                                    APP                                     */
+/* -------------------------------------------------------------------------- */
 
 export default function App() {
-  const { user, loading } = useAuth();
+  const { loading } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
 
-
   return (
     <>
-      {/* ROUTES */}
       <Routes>
+        {/* HOME – ALWAYS OPEN */}
         <Route
           path="/"
           element={
             loading ? (
               <div className="p-6 text-center">Loading...</div>
-            ) : user ? (
-              <Navigate to="/inbox" replace />
             ) : (
               <Home
                 onLoginClick={() => setShowLoginModal(true)}
                 onSignupClick={() => setShowSignupModal(true)}
-
-
               />
             )
           }
         />
+
+        {/* LOGIN */}
         <Route
           path="/login"
           element={
@@ -89,7 +105,7 @@ export default function App() {
           }
         />
 
-        {/* SIGNUP PAGE */}
+        {/* SIGNUP */}
         <Route
           path="/signup"
           element={
@@ -165,10 +181,11 @@ export default function App() {
         />
       </ModalWrapper>
 
-
-      {/* LOGIN MODAL (WORKS GLOBALLY) */}
-      <ModalWrapper open={showLoginModal} onClose={() => setShowLoginModal(false)}>
-        {/* <Login onClose={() => setShowLoginModal(false)} /> */}
+      {/* LOGIN MODAL */}
+      <ModalWrapper
+        open={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+      >
         <Login
           onClose={() => setShowLoginModal(false)}
           onSwitchToSignup={() => {
