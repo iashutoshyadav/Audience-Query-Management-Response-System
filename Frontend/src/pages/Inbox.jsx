@@ -75,15 +75,15 @@ export default function Inbox() {
 
   return (
     <div className="flex h-full bg-gray-50">
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-0">
 
         <h1 className="text-2xl font-semibold mb-1">Inbox</h1>
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-sm text-gray-500 mb-4">
           Manage customer queries from Email & WhatsApp
         </p>
 
         {/* Search Bar */}
-        <div className="mb-6">
+        <div className="mb-4">
           <div className="relative w-full">
             <Search className="absolute left-3 top-3 text-gray-400" size={18} />
             <input

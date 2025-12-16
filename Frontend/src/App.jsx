@@ -168,7 +168,14 @@ export default function App() {
 
       {/* LOGIN MODAL (WORKS GLOBALLY) */}
       <ModalWrapper open={showLoginModal} onClose={() => setShowLoginModal(false)}>
-        <Login onClose={() => setShowLoginModal(false)} />
+        {/* <Login onClose={() => setShowLoginModal(false)} /> */}
+        <Login
+          onClose={() => setShowLoginModal(false)}
+          onSwitchToSignup={() => {
+            setShowLoginModal(false);
+            setShowSignupModal(true);
+          }}
+        />
       </ModalWrapper>
     </>
   );

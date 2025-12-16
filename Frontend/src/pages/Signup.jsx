@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 export default function Signup({ onClose, onSwitchToLogin }) {
@@ -20,39 +20,47 @@ export default function Signup({ onClose, onSwitchToLogin }) {
     const e = {};
     if (!form.name.trim()) e.name = "Name is required";
     if (!form.email.trim()) e.email = "Email is required";
-    if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Invalid email";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
+      e.email = "Invalid email";
+
     if (!form.password.trim()) e.password = "Password is required";
-    if (form.password.length < 8) e.password = "Minimum 8 characters";
+    else if (form.password.length < 8) e.password = "Minimum 8 characters";
 
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (ev) => {
+    ev.preventDefault();
     if (!validate()) return;
 
     setLoading(true);
 
     try {
       await register(form);
-
-      // If opened inside modal
-      if (onSwitchToLogin) {
-        if (onClose) onClose();          // Close signup modal
-        onSwitchToLogin();               // Open login modal
+      if (typeof onSwitchToLogin === "function") {
+        if (onClose) onClose(); // close signup modal first
+        onSwitchToLogin();      // open login modal
         return;
       }
 
-      // If opened as standalone page
       alert("Account created successfully! Please login.");
-      navigate("/login");
-
+      navigate("/login", { replace: true });
     } catch (err) {
-      setErrors({ form: err.message || "Registration failed" });
+      setErrors({ form: err?.message || "Registration failed" });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSwitchToLogin = (ev) => {
+    if (ev && typeof ev.preventDefault === "function") ev.preventDefault();
+    if (typeof onSwitchToLogin === "function") {
+      if (onClose) onClose();
+      onSwitchToLogin();
+      return;
+    }
+    navigate("/login");
   };
 
   return (
@@ -70,6 +78,7 @@ export default function Signup({ onClose, onSwitchToLogin }) {
           <div>
             <label className="block text-sm font-medium">Name</label>
             <input
+              id="name"
               name="name"
               value={form.name}
               onChange={onChange}
@@ -110,7 +119,7 @@ export default function Signup({ onClose, onSwitchToLogin }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2 bg-teal-600 text-white rounded hover:bg-teal-700"
+          className="w-full py-2 bg-teal-600 text-white rounded hover:bg-teal-700"
           >
             {loading ? "Please wait..." : "Register"}
           </button>
@@ -118,18 +127,13 @@ export default function Signup({ onClose, onSwitchToLogin }) {
 
         <p className="text-sm text-center mt-4">
           Already have an account?{" "}
-          <Link
-            to="/login"
-            onClick={() => {
-              if (onSwitchToLogin) {
-                if (onClose) onClose();
-                onSwitchToLogin();
-              }
-            }}
+          <button
+            type="button"
+            onClick={handleSwitchToLogin}
             className="text-teal-600 hover:underline"
           >
             Login
-          </Link>
+          </button>
         </p>
       </div>
     </div>

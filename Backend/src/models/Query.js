@@ -78,6 +78,22 @@ const querySchema = new mongoose.Schema(
       type: String,
       default: 'email',
     },
+    summary: {
+      type: String,
+      default: "",
+    },
+    sentiment: {
+      type: String,
+      default: "neutral",
+    },
+     confidence: {
+      type: Number,
+      default: 0.5,
+    },
+    category: {
+      type: String,
+      default: "General",
+    },
     receivedAt: {
       type: Date,
       default: Date.now,

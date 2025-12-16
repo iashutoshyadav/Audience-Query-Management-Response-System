@@ -1,19 +1,25 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
 export default function RightSidebar({ open, onClose }) {
   const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+    onClose();
+    navigate("/", { replace: true });
+  };
 
   return (
     <>
-      {open && (
-        <div
-          className="fixed inset-0 bg-black/40 z-40"
-          onClick={onClose}
-        ></div>
-      )}
+      {open && <div className="fixed inset-0 bg-black/40 z-40" onClick={onClose}></div>}
 
       <div
         className={`fixed right-0 top-0 h-full w-64 bg-white z-50 shadow-lg transition-transform duration-300 
@@ -25,28 +31,11 @@ export default function RightSidebar({ open, onClose }) {
         </div>
 
         <nav className="flex flex-col mt-4 px-4 space-y-3">
+          <Link to="/inbox" className="py-2" onClick={onClose}>Inbox</Link>
+          <Link to="/dashboard" className="py-2" onClick={onClose}>Dashboard</Link>
+          <Link to="/queries/new" className="py-2" onClick={onClose}>New Query</Link>
 
-           <Link to="/inbox" className="py-2" onClick={onClose}>
-            Inbox
-          </Link>
-          
-          <Link to="/dashboard" className="py-2" onClick={onClose}>
-            Dashboard
-          </Link>
-
-         
-
-          <Link to="/queries/new" className="py-2" onClick={onClose}>
-            New Query
-          </Link>
-
-          <button
-            className="py-2 text-red-600 text-left"
-            onClick={() => {
-              logout();
-              onClose();
-            }}
-          >
+          <button className="py-2 text-red-600 text-left" onClick={handleLogout}>
             Logout
           </button>
         </nav>

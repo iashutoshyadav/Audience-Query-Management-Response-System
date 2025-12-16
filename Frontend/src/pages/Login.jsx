@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
-export default function Login({ onClose }) {
+export default function Login({ onClose, onSwitchToSignup }) {
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -19,30 +19,41 @@ export default function Login({ onClose }) {
   const validate = () => {
     const e = {};
     if (!form.email.trim()) e.email = "Email is required";
-    if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Invalid email";
+    else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Invalid email";
+
     if (!form.password.trim()) e.password = "Password is required";
-    if (form.password.length < 8) e.password = "Minimum 8 characters";
+    else if (form.password.length < 8) e.password = "Minimum 8 characters";
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (ev) => {
+    ev.preventDefault();
     if (!validate()) return;
 
     setLoading(true);
     try {
       await login(form);
 
-      // CLOSE LOGIN MODAL AFTER SUCCESS
+      // CLOSE LOGIN MODAL AFTER SUCCESS (if provided)
       if (onClose) onClose();
 
-      navigate("/inbox");
+      navigate("/inbox", { replace: true });
     } catch (err) {
-      setErrors({ form: err.message || "Login failed" });
+      setErrors({ form: err?.message || "Login failed" });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSwitchToSignup = () => {
+    if (typeof onSwitchToSignup === "function") {
+      onSwitchToSignup();
+      return;
+    }
+    navigate("/signup");
+    if (onClose) onClose();
   };
 
   return (
@@ -57,7 +68,6 @@ export default function Login({ onClose }) {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-
           <div>
             <label className="block text-sm font-medium">Email</label>
             <input
@@ -70,7 +80,9 @@ export default function Login({ onClose }) {
               }`}
               placeholder="you@example.com"
             />
-            {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
+            {errors.email && (
+              <p className="text-xs text-red-500">{errors.email}</p>
+            )}
           </div>
 
           <div>
@@ -101,9 +113,13 @@ export default function Login({ onClose }) {
 
         <p className="text-sm text-center mt-4">
           Don’t have an account?{" "}
-          <Link to="/signup" className="text-teal-600 hover:underline">
+          <button
+            type="button"
+            onClick={handleSwitchToSignup}
+            className="text-teal-600 hover:underline"
+          >
             Register
-          </Link>
+          </button>
         </p>
       </div>
     </div>

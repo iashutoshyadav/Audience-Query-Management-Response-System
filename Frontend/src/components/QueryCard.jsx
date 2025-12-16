@@ -1,6 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Mail, Twitter, Users, Clock, MessageCircle } from "lucide-react";
+import {
+  Mail,
+  Twitter,
+  Users,
+  Clock,
+  MessageCircle,
+  AlertCircle,
+} from "lucide-react";
 
 /* ------------------ TAG COLORS ------------------ */
 const TagStyle = {
@@ -9,11 +16,12 @@ const TagStyle = {
   medium: "bg-yellow-200 text-yellow-800",
   low: "bg-green-200 text-green-700",
 
-  // category tags
+  // AI Category Tags
   complaint: "bg-red-100 text-red-700",
   billing: "bg-purple-100 text-purple-700",
   technical: "bg-blue-100 text-blue-700",
   question: "bg-indigo-100 text-indigo-700",
+  general: "bg-gray-100 text-gray-700",
 
   default: "bg-gray-200 text-gray-700",
 };
@@ -23,6 +31,7 @@ const sentimentEmoji = {
   positive: "😊",
   neutral: "😐",
   negative: "😡",
+  very_negative: "🤬",
 };
 
 /* ------------------ CHANNEL ICONS ------------------ */
@@ -46,7 +55,7 @@ export default function QueryCard({ q }) {
   return (
     <div className="w-full bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all">
       
-      {/* ------------ Tags + Priority + Category ------------ */}
+      {/* ------------ TAGS: AI Tags + Priority + Category ------------ */}
       <div className="flex flex-wrap items-center gap-2 mb-4">
 
         {/* AI Tags */}
@@ -57,7 +66,7 @@ export default function QueryCard({ q }) {
               TagStyle[tag.toLowerCase()] || TagStyle.default
             }`}
           >
-            {tag}
+            #{tag}
           </span>
         ))}
 
@@ -72,9 +81,13 @@ export default function QueryCard({ q }) {
           </span>
         )}
 
-        {/* Category */}
+        {/* AI Category */}
         {q.category && (
-          <span className="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 font-medium">
+          <span
+            className={`px-3 py-1 text-xs rounded-full font-medium ${
+              TagStyle[q.category.toLowerCase()] || TagStyle.default
+            }`}
+          >
             {q.category}
           </span>
         )}
@@ -88,17 +101,22 @@ export default function QueryCard({ q }) {
 
         <p className="text-gray-800 mt-1 text-[15px]">
           <span className="font-semibold">{q.title}</span> —{" "}
-          {(q.summary && q.summary.substring(0, 100)) ||
-            q.body?.substring(0, 100) ||
+          {q.summary?.substring(0, 120) ||
+            q.body?.substring(0, 120) ||
             "No message"}
         </p>
       </Link>
 
-      {/* ------------ Sentiment ------------ */}
+      {/* ------------ Sentiment + Confidence ------------ */}
       {q.sentiment && (
-        <div className="mt-4 bg-[#0a1747] text-white rounded-md py-2 px-4 w-fit">
-          <span className="font-semibold">Sentiment:</span>&nbsp;
+        <div className="mt-4 bg-[#0a1747] text-white rounded-md py-2 px-4 w-fit flex gap-2 items-center">
+          <span className="font-semibold">Sentiment:</span>
           {sentimentEmoji[q.sentiment] || "🙂"} {q.sentiment}
+          {q.confidence && (
+            <span className="ml-2 text-xs opacity-80">
+              ({Math.round(q.confidence * 100)}% confident)
+            </span>
+          )}
         </div>
       )}
 
@@ -119,16 +137,15 @@ export default function QueryCard({ q }) {
             {timeAgo(q.createdAt)}
           </span>
 
-          {/* Assigned User */}
+          {/* Assigned Agent */}
           {q.assigned_to && (
             <span className="flex items-center gap-1">
-              👤 {q.assigned_to.name || "Assigned"}
+              👤 {q.assigned_to?.name || "Assigned"}
             </span>
           )}
         </div>
 
         {/* Right Side Buttons */}
-
         <div className="flex gap-3">
           <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">
             Analyze

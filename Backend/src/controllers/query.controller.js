@@ -1,6 +1,10 @@
 import Joi from "joi";
 import Query from "../models/Query.js";
 
+import detectPriority from "../utils/priority.js";
+import { classifyText } from "../utils/classify.js";
+import assignAgent from "../utils/assign.js";
+
 /* ------------------------------ Validation ------------------------------ */
 
 const createSchema = Joi.object({
@@ -23,24 +27,59 @@ const updateSchema = Joi.object({
 const queryCtrl = {};
 
 /**
- * Create Query
+ * Create Query WITH AI Classification + Auto Priority + Auto Assignment
  */
 queryCtrl.create = async (req, res) => {
   try {
     const { error, value } = createSchema.validate(req.body);
     if (error) return res.status(400).json({ error: error.message });
+
+    const { title, body } = value;
+
+    /* ------------------------------------------
+     * 1️⃣ AI CLASSIFICATION
+     * ------------------------------------------*/
+    const ai = await classifyText(title, body); 
+    // ai = {category, tags, sentiment, summary, confidence}
+
+    /* ------------------------------------------
+     * 2️⃣ PRIORITY DETECTION
+     * ------------------------------------------*/
+    const priority = detectPriority(body);
+
+    /* ------------------------------------------
+     * 3️⃣ AUTO ASSIGN AGENT
+     * ------------------------------------------*/
+    const agentId = await assignAgent(ai.category, priority);
+
+    /* ------------------------------------------
+     * 4️⃣ SAVE QUERY IN DATABASE
+     * ------------------------------------------*/
     const query = await Query.create({
-      ...value,
+      title,
+      body,
       user: req.user.id,
-      priority: "medium",
+      tags: ai.tags || [],
+      category: ai.category || "General",
+      sentiment: ai.sentiment || "neutral",
+      summary: ai.summary || "",
+      priority,
+      assigned_to: agentId,
       status: "open",
-      tags: [],
+      source: "manual",
     });
 
-    res.status(201).json({ data: query });
+    return res.status(201).json({
+      success: true,
+      message: "Query created with AI insights",
+      data: query,
+    });
+
   } catch (err) {
     console.error("CREATE QUERY ERROR:", err);
-    res.status(500).json({ error: err.message || "Failed to create query" });
+    return res.status(500).json({
+      error: err.message || "Server error while creating query",
+    });
   }
 };
 
@@ -59,16 +98,22 @@ queryCtrl.list = async (req, res) => {
         .skip(skip)
         .limit(Number(limit))
         .populate("user", "name email")
+        .populate("assigned_to", "name email")
         .lean(),
       Query.countDocuments(),
     ]);
 
-    res.json({
+    return res.json({
       data: items,
-      meta: { total, page: Number(page), limit: Number(limit) },
+      meta: {
+        total,
+        page: Number(page),
+        limit: Number(limit),
+      },
     });
+
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch queries" });
+    return res.status(500).json({ error: "Failed to fetch queries" });
   }
 };
 
@@ -79,13 +124,15 @@ queryCtrl.get = async (req, res) => {
   try {
     const q = await Query.findById(req.params.id)
       .populate("user", "name email")
+      .populate("assigned_to", "name email")
       .lean();
 
     if (!q) return res.status(404).json({ error: "Not found" });
 
-    res.json({ data: q });
+    return res.json({ data: q });
+
   } catch (err) {
-    res.status(500).json({ error: "Error fetching query" });
+    return res.status(500).json({ error: "Error fetching query" });
   }
 };
 
@@ -101,9 +148,10 @@ queryCtrl.update = async (req, res) => {
       new: true,
     });
 
-    res.json({ data: q });
+    return res.json({ data: q });
+
   } catch (err) {
-    res.status(500).json({ error: "Failed to update query" });
+    return res.status(500).json({ error: "Failed to update query" });
   }
 };
 
@@ -113,9 +161,9 @@ queryCtrl.update = async (req, res) => {
 queryCtrl.remove = async (req, res) => {
   try {
     await Query.findByIdAndDelete(req.params.id);
-    res.status(204).end();
+    return res.status(204).end();
   } catch (err) {
-    res.status(500).json({ error: "Failed to delete query" });
+    return res.status(500).json({ error: "Failed to delete query" });
   }
 };
 

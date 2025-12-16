@@ -37,6 +37,24 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    skills: {
+      type: [String],
+      default: [],
+    },
+    experience: {
+      type: Number,
+      default: 1,
+      min: 1,
+      max: 10,
+    },
+    assignedCount: {
+      type: Number,
+      default: 0,
+    },
+    is_online: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
