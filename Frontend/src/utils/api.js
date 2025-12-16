@@ -3,7 +3,7 @@ import { API_BASE, TOKEN_KEY } from "./constants";
 
 const api = axios.create({
   baseURL: API_BASE,
-  timeout: 15000,
+  timeout: 30000,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -29,7 +29,7 @@ api.interceptors.response.use(
     if (!error.response) {
       return Promise.reject({
         status: null,
-        message: "Network error. Please check your connection.",
+        message: "Server is starting. Please wait a few seconds and try again.",
         data: null,
         raw: error,
       });

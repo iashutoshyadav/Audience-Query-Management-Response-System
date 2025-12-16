@@ -42,7 +42,8 @@ app.use(
 const allowedOrigins = [
   "http://localhost:5173",
   "https://audience-query-management-response-theta.vercel.app",
-   "https://www.audiencequery.online",
+  "https://audiencequery.online",
+  "https://www.audiencequery.online",
 ];
 
 app.use(
