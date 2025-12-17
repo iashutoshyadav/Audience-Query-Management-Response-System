@@ -2,17 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-/* small app-level customizations */
-html, body, #root {
+/* App-level defaults */
+html,
+body,
+#root {
   height: 100%;
 }
 
 body {
-  background: #f8fafc;
+  background-color: #f8fafc; /* soft SaaS gray */
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Layout helper */
 .container-max {
   max-width: 1200px;
   margin-left: auto;
